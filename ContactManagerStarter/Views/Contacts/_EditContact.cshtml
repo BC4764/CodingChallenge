@@ -40,7 +40,8 @@
                 <ul id="emailList" class="list-group">
                     @if (Model.EmailAddresses != null)
                     {
-                        foreach (var emailAddress in Model.EmailAddresses)
+                    int emailIndex = 0;
+                    foreach (var emailAddress in Model.EmailAddresses)
                         {
                             <li class="list-group-item emailListItem" data-email="@emailAddress.Email" data-type="@emailAddress.Type">
                                 @{
@@ -53,11 +54,13 @@
                                         <span class="badge badge-success m-l-10"> @emailAddress.Type</span>
                                     }
                                 }
-
+                            
+                                <input type="radio" name="primaryEmail" class="email-info" data-id="@emailIndex" @(emailIndex == 0 ? "checked" : "") />
                                 <span class="m-l-20">@emailAddress.Email</span>
                                 <a class="redText pointer float-right removeEmail" title="Delete Email">X</a>
-                            </li>
-                        }
+                        </li>
+                        emailIndex++;
+                    }
                     }
                 </ul>
             </div>
@@ -160,3 +163,32 @@
             <button id="saveContactButton" class="btn btn-success">Save</button>
         </div>
     </div>
+
+@section Scripts {
+    <script>
+        document.getElementById("saveContactButton").addEventListener("click", function(event) {
+            var newEmailAddress = document.getElementById("newEmailAddress");
+            var newAddressStreet1 = document.getElementById("newAddressStreet1");
+
+            if (newEmailAddress.value || newAddressStreet1.value) {
+                event.preventDefault();
+                alert("You have typed an email address or mailing address but haven't added it to the list. Please add the addresses or clear the input fields before submitting.");
+            } 
+        });
+
+        $("#saveContactButton").click(function () {
+            // Existing code for validation and saving contact would go here
+
+            // Store the primary email index
+            let primaryEmailIndex = $('input[name="primaryEmail"]:checked').data('id');
+        });
+
+        // Existing code to collect contact details would go here
+
+        // Add the primary email index to the data object
+        var data = {
+            // Other contact data
+            PrimaryEmailIndex: primaryEmailIndex
+        };
+    </script>
+}

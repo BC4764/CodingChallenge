@@ -3,6 +3,7 @@ using ContactManager.Hubs;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
+using ElmahCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 
 builder.Services.AddSignalR();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -36,6 +38,7 @@ using (var scope = app.Services.CreateScope())
     var dataContext = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
     dataContext.Database.Migrate();
 }
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

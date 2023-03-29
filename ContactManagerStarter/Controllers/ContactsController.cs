@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using MailKit;
 using MimeKit;
 using MailKit.Net.Smtp;
+using ElmahCore;
 
 namespace ContactManager.Controllers
 {
@@ -18,11 +19,15 @@ namespace ContactManager.Controllers
     {
         private readonly ApplicationContext _context;
         private readonly IHubContext<ContactHub> _hubContext;
+        private readonly ILogger<ContactsController> _logger;
+        private readonly ErrorLog _errorLog;
 
-        public ContactsController(ApplicationContext context, IHubContext<ContactHub> hubContext)
+        public ContactsController(ApplicationContext context, IHubContext<ContactHub> hubContext, ILogger<ContactsController> logger, ErrorLog errorLog)
         {
             _context = context;
             _hubContext = hubContext;
+            _logger = logger;
+            _errorLog = errorLog;
         }
 
         public async Task<IActionResult> DeleteContact(Guid id)
@@ -36,12 +41,19 @@ namespace ContactManager.Controllers
                 return BadRequest();
             }
 
-            _context.EmailAddresses.RemoveRange(contactToDelete.EmailAddresses);
-            _context.Contacts.Remove(contactToDelete);
+            try
+            {
+                _context.EmailAddresses.RemoveRange(contactToDelete.EmailAddresses);
+                _context.Contacts.Remove(contactToDelete);
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-            await _hubContext.Clients.All.SendAsync("Update");
+                await _hubContext.Clients.All.SendAsync("Update");
+            }
+            catch (Exception ex)
+            {
+                _errorLog.Log(new Error(ex));
+            }
 
             return Ok();
         }
@@ -87,7 +99,7 @@ namespace ContactManager.Controllers
             }
 
         public IActionResult NewContact()
-        {
+        {           
             return PartialView("_EditContact", new EditContactViewModel());
         }
 
@@ -144,11 +156,17 @@ namespace ContactManager.Controllers
                 _context.Contacts.Update(contact);
             }
 
+            try
+            {
+                await _context.SaveChangesAsync();
+                await _hubContext.Clients.All.SendAsync("Update");
 
-            await _context.SaveChangesAsync();
-            await _hubContext.Clients.All.SendAsync("Update");
-
-            SendEmailNotification(contact.Id);
+                SendEmailNotification(contact.Id);
+            }
+            catch (Exception ex)
+            {
+                _errorLog.Log(new Error(ex));
+            }
 
             return Ok();
         }
