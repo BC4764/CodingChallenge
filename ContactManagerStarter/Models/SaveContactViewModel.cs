@@ -14,6 +14,6 @@ namespace ContactManager.Models
         public DateTime DOB { get; set; }
         public List<EmailViewModel> Emails { get; set; } = new List<EmailViewModel>();
         public List<AddressViewModel> Addresses { get; set; } = new List<AddressViewModel>();
-
+        public int? PrimaryEmailId { get; set; }
     }
 }

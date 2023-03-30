@@ -1,5 +1,4 @@
-﻿
-@*
+﻿@*
     For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 *@
 
@@ -19,6 +18,7 @@
                 <td class="editContact" data-id="@contact.Id">@contact.Title</td>
                 <td class="editContact" data-id="@contact.Id">@contact.FirstName</td>
                 <td class="editContact" data-id="@contact.Id">@contact.LastName</td>
+                <td class="editContact" data-id="@contact.Id">@contact.PrimaryEmail.Email != null ? contact.PrimaryEmail.Address : contact.Emails.FirstOrDefault()?.Address)</td>
                 <td class="whiteBackground defaultCursor"><a class="redText float-right pointer deleteContact" title="Delete Contact" data-toggle="modal" data-target="#modal-delete" data-id="@contact.Id">X</a></td>
             </tr>
         }

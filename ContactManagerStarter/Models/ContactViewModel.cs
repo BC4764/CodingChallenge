@@ -9,5 +9,7 @@ namespace ContactManager.Models
     public class ContactViewModel
     {
         public List<Contact> Contacts { get; set; }
+        public int? PrimaryEmailId { get; set; }
+        public List<EmailAddress> EmailAddresses { get; set; }
     }
 }

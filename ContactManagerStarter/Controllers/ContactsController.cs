@@ -18,11 +18,13 @@ namespace ContactManager.Controllers
     {
         private readonly ApplicationContext _context;
         private readonly IHubContext<ContactHub> _hubContext;
+        private readonly ILogger<ContactsController> _logger;
 
-        public ContactsController(ApplicationContext context, IHubContext<ContactHub> hubContext)
+        public ContactsController(ApplicationContext context, IHubContext<ContactHub> hubContext, ILogger<ContactsController> logger)
         {
             _context = context;
             _hubContext = hubContext;
+            _logger = logger;
         }
 
         public async Task<IActionResult> DeleteContact(Guid id)
@@ -66,7 +68,8 @@ namespace ContactManager.Controllers
                 LastName = contact.LastName,
                 DOB = contact.DOB,
                 EmailAddresses = contact.EmailAddresses,
-                Addresses = contact.Addresses
+                Addresses = contact.Addresses,
+                PrimaryEmailId = contact.PrimaryEmailId,
             };
 
             return PartialView("_EditContact", viewModel);
@@ -92,8 +95,9 @@ namespace ContactManager.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveContact([FromBody]SaveContactViewModel model)
+        public async Task<IActionResult> SaveContact([FromBody] SaveContactViewModel model)
         {
+            try { 
             var contact = model.ContactId == Guid.Empty
                 ? new Contact { Title = model.Title, FirstName = model.FirstName, LastName = model.LastName, DOB = model.DOB }
                 : await _context.Contacts.Include(x => x.EmailAddresses).Include(x => x.Addresses).FirstOrDefaultAsync(x => x.Id == model.ContactId);
@@ -134,6 +138,7 @@ namespace ContactManager.Controllers
             contact.FirstName = model.FirstName;
             contact.LastName = model.LastName;
             contact.DOB = model.DOB;
+            contact.PrimaryEmailId = model.PrimaryEmailId;
 
             if (model.ContactId == Guid.Empty)
             {
@@ -150,7 +155,13 @@ namespace ContactManager.Controllers
 
             SendEmailNotification(contact.Id);
 
-            return Ok();
+            return Ok(); 
+            }
+             catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while saving contact");
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
 
         private void SendEmailNotification(Guid contactId)

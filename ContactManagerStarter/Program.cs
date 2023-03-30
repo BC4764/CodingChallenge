@@ -3,6 +3,8 @@ using ContactManager.Hubs;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
+using Microsoft.Extensions.DependencyInjection;
+using ElmahCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,13 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
                         opts => opts.CommandTimeout(600)));
 
 builder.Services.AddSignalR();
+
+// Add ELMAH services and configuration
+builder.Services.AddElmah(options =>
+{
+    options.ConnectionString = builder.Configuration.GetConnectionString("Elmah");
+    options.Path = builder.Configuration["Elmah:Path"];
+});
 
 var app = builder.Build();
 
@@ -43,6 +52,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseElmah();
 
 app.MapRazorPages();
 
