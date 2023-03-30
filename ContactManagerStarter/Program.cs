@@ -46,6 +46,7 @@ using (var scope = app.Services.CreateScope())
     dataContext.Database.Migrate();
 }
 
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

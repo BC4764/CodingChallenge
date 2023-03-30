@@ -15,5 +15,4 @@ namespace ContactManager.Data
         public virtual List<Address> Addresses { get; set; } = new List<Address>();
         public int? PrimaryEmailId { get; set; }   
     }
-
 }
